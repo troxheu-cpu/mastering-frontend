@@ -1,7 +1,12 @@
-const API = import.meta.env.VITE_API_BASE_URL;
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
 export async function ping() {
-  const res = await fetch(`${API}/`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!API_BASE) throw new Error("VITE_API_BASE_URL er ikke satt");
+  const res = await fetch(`${API_BASE}/`, { headers: { Accept: "application/json" } });
+  const ct = res.headers.get("content-type") || "";
+  if (!ct.includes("application/json")) {
+    const txt = await res.text();
+    throw new Error(`Forventet JSON, fikk: ${txt.slice(0, 60)}...`);
+  }
   return res.json();
 }
